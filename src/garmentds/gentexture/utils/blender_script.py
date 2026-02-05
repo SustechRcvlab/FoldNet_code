@@ -59,7 +59,7 @@ class RscManager:
         if os.path.exists(path):
             return path
         else:
-            raise ValueError(f"Cannot find keypoints_3D.npy.")
+            raise ValueError("Cannot find keypoints_3D.npy.")
 
 class BlenderEnv:
     def __init__(self, rsc_manager: RscManager, 

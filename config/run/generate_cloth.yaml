@@ -30,8 +30,8 @@ garment:
   num_to_generate: 2
   mesh_input_dir: 
   cloth_output_dir: 
-  strategy: synthetic # 'synthetic' / 'polyhaven' / "text2tex" are supported
-  paint:
+  strategy: synthetic # "synthetic" / "polyhaven" / "text2tex" are supported
+  paint_cfg:
     synthetic:
       client: # "openai" or "dmiapi": client to generate prompt for diffusion model, if None use default prompt
       group_size: 3 # number of clothes in a group for comparison
@@ -45,7 +45,7 @@ garment:
       pipeline:
       identity: "a multicolored tshirt with designs"
       python: # python interpreter path to run text2tex
-  rating:
+  rating_cfg:
     backend: # "openai", "dmiapi" and "clip_score" are supported. If None, use random selection.
 
 use_ui: true

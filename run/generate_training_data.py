@@ -8,7 +8,7 @@ def setup_env_var():
     base_dir = '/'.join(base_dir.split('/')[:-2])
 
     # pyflex
-    os.environ["GARMENTDS_BASE_DIR"] = base_dir
+    os.environ["FOLDNET_BASE_DIR"] = base_dir
     os.environ["PYFLEX_PATH"] = os.path.join(base_dir, "src/pyflex/PyFlex")
     sys.path.append(os.path.join(base_dir, "src/pyflex/PyFlex/bindings/build"))
 

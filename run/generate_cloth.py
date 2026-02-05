@@ -8,14 +8,16 @@ def setup_env_var():
     base_dir = '/'.join(base_dir.split('/')[:-2])
 
     # pyflex
-    os.environ["GARMENTDS_BASE_DIR"] = base_dir
+    if os.environ.get("FOLDNET_BASE_DIR") is None:
+        os.environ["FOLDNET_BASE_DIR"] = base_dir
     os.environ["PYFLEX_PATH"] = os.path.join(base_dir, "src/pyflex/PyFlex")
     sys.path.append(os.path.join(base_dir, "src/pyflex/PyFlex/bindings/build"))
 
     # openai
-    # os.environ['OPENAI_API_KEY'] = "your_api_key_here"
-    # os.environ['http_proxy'] = 'http://127.0.0.1:17891'
-    # os.environ['https_proxy'] = 'http://127.0.0.1:17891'
+    # if os.environ["OPENAI_API_KEY"] is None:
+    #     os.environ["OPENAI_API_KEY"] = "your_api_key_here"
+    # os.environ["http_proxy"] = "http://127.0.0.1:17891"
+    # os.environ["https_proxy"] = "http://127.0.0.1:17891"
 
 setup_env_var()
 
@@ -33,7 +35,7 @@ def main(cfg: omegaconf.DictConfig):
     cfg = utils.resolve_overwrite(cfg)
     omegaconf.OmegaConf.save(cfg, os.path.join(os.getcwd(), ".hydra", "resolved.yaml"))
 
-    factory.make_cloth(**cfg)
+    factory.make_cloth(**cfg["garment"])
 
 
 if __name__ == "__main__":

@@ -1,21 +1,16 @@
 import os
 import shutil
 
-import threading
-from time import sleep
-
 import json
 import omegaconf
 import subprocess
-
-from sklearn import base
 import numpy as np
 
 from garmentds.gentexture.paint import Painter
 from garmentds.gentexture.rating import Judge
 
 class Factory:
-    def __init__(self, cloth_output_dir, name):
+    def __init__(self, cloth_output_dir: str, name: str):
         self.cloth_output_dir = cloth_output_dir
         self.cloth_output_idx = 0
         os.makedirs(self.cloth_output_dir, exist_ok=True)
@@ -75,8 +70,8 @@ class SyntheticFactory(Factory):
 
     def paint_cloth(self, category):
         """
-            generate num_to_generate*3 textures, remain 1/3 of 
-            them according to which got the best score
+            generate 'group_size' candidate textures, remain 
+            one in each group according to their scores
         """
 
         group_size = self.paint_cfg["group_size"]
@@ -92,9 +87,9 @@ class SyntheticFactory(Factory):
             else:
                 self.painter.paint_cloth(category, texture_dir)
 
-        print(f"[ INFO ] Rating candidate clothes...")
+        print("[ INFO ] Rating candidate clothes...")
         self.judge.choose_best_texture(self.output_dir)
-        print(f"[ INFO ] Rating done...")
+        print("[ INFO ] Rating done...")
 
     def export_cfg(self):
         return dict(
@@ -112,7 +107,7 @@ class Text2TexFactory(Factory):
         self.painter = Painter(**self.paint_cfg)
         
         # get path to blender_script
-        base_dir = os.environ["GARMENTDS_BASE_DIR"]
+        base_dir = os.environ["FOLDNET_BASE_DIR"]
         script = os.path.join(base_dir, "src/garmentds/gentexture/utils/blender_script.py")
         self.blender_script = script
 
@@ -149,7 +144,7 @@ class PolyHavenFactory(Factory):
         self.painter = Painter(**self.paint_cfg)
 
         # get path to blender_script
-        base_dir = os.environ["GARMENTDS_BASE_DIR"]
+        base_dir = os.environ["FOLDNET_BASE_DIR"]
         script = os.path.join(base_dir, "src/garmentds/gentexture/utils/blender_script.py")
         self.blender_script = script
 
@@ -177,10 +172,17 @@ class PolyHavenFactory(Factory):
     def export_cfg(self):
         return dict(paint_cfg=dict(self.paint_cfg))
 
-def make_cloth(**cfg):
-    category, start_idx, num_to_generate, mesh_input_dir, \
-        cloth_output_dir, strategy, paint_cfg, rating_cfg = cfg["garment"].values()
-        
+def make_cloth(
+    category: str = "tshirt_sp",
+    start_idx: int = 0,
+    num_to_generate: int = 1,
+    mesh_input_dir: str = None,
+    cloth_output_dir: str = "./cloth",
+    strategy: str = "synthetic",
+    paint_cfg: dict = None,
+    rating_cfg: dict = None
+):
+    print(category, start_idx, num_to_generate, mesh_input_dir, cloth_output_dir, strategy)
     # get mesh
     all_mesh_paths = os.listdir(mesh_input_dir)
     print(f"[ INFO ] found {len(all_mesh_paths)} meshes in {mesh_input_dir}")

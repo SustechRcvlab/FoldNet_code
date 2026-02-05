@@ -7,7 +7,7 @@ from ..genmesh.base_cls import Point2
 import garmentds.common.utils as utils
 
 available_category_type = Literal[
-    "tshirt", "tshirt_cp", "trousers", 
+    "tshirt", "tshirt_sp", "trousers", 
     "vest", "vest_sp", "vest_close", "vest_close_sp",
     "shirt", "shirt_close", "hooded", "hooded_close"
 ]

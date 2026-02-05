@@ -4,10 +4,7 @@ import subprocess
 
 import torch
 import numpy as np 
-
-import cv2
 from PIL import Image
-
 from diffusers import DiffusionPipeline
 
 from garmentds.gentexture.template.clothes import * 
@@ -46,7 +43,7 @@ class Painter:
         
         self.generate_texture_images(category, output_dir, texture_ready_to_use)
 
-        base_dir = os.environ["GARMENTDS_BASE_DIR"]
+        base_dir = os.environ["FOLDNET_BASE_DIR"]
         script = os.path.join(base_dir, "src/garmentds/gentexture/utils/blender_script.py")
         self.render(script, output_dir, need_mask=False, need_keypoints_2D=False)
 
@@ -94,7 +91,7 @@ class Painter:
                         |---- material_0.png <--- texture image
         """
         command_line = ['blender', '-noaudio', '--background', '--python', blender_script, 
-                         '--', f'--base_dir={output_dir}', f'--cloth_rotation_euler=[0.0,0.0,0.0]']
+                         '--', f'--base_dir={output_dir}', '--cloth_rotation_euler=[0.0,0.0,0.0]']
         if need_mask:
             command_line.append("--need_mask")
         if need_keypoints_2D:
@@ -137,7 +134,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    os.environ["GARMENTDS_BASE_DIR"] = os.path.abspath(__file__).split("src")[0][:-1]
+    os.environ["FOLDNET_BASE_DIR"] = os.path.abspath(__file__).split("src")[0][:-1]
     painter = Painter(client=args.client, pipeline=args.pipeline, 
                     use_same_front_back=args.use_same_front_back,
                     use_symmetric_texture=args.use_symmetric_texture)
