@@ -20,22 +20,23 @@ setup:
     device_memory_GB: 4
   
     debug: False
+    seed: ${glb_cfg.seed}
     advanced_optimization: True
     fast_math: False
     offline_cache: True
 
 garment: 
-  category: tshirt_sp
+  category: tshirt_sp # tshirt(_sp) / trousers / vest(_close) / hooded(_close) / shirt(_close)
   start_idx: 0
   num_to_generate: 2
-  mesh_input_dir: 
-  cloth_output_dir: 
+  mesh_input_dir:
+  cloth_output_dir:
   strategy: synthetic # "synthetic" / "polyhaven" / "text2tex" are supported
   paint_cfg:
     synthetic:
       client: # "openai" or "dmiapi": client to generate prompt for diffusion model, if None use default prompt
       group_size: 3 # number of clothes in a group for comparison
-      pipeline: #"stabilityai/stable-diffusion-3.5-large" or "stabilityai/stable-diffusion-3.5-large-turbo"
+      pipeline: "stabilityai/stable-diffusion-3.5-large"
       use_same_front_back: True # should front and back use the same texture image?
       ready_to_use_texture_dir: # if not None, use texture images under this directory instead of generating new one
     polyhaven:

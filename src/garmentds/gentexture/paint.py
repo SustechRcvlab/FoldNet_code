@@ -28,7 +28,12 @@ class Painter:
             "tshirt_sp": TShirtSPSim(client, use_same_front_back, use_symmetric_texture),
             "trousers": TrousersSim(client, use_same_front_back, use_symmetric_texture),
             "vest": VestCloseSPSim(client, use_same_front_back, use_symmetric_texture),
+            "vest_close": VestCloseSPSim(client, use_same_front_back, use_symmetric_texture),
             "hooded": HoodedCloseSim(client, use_same_front_back, use_symmetric_texture),     
+            "hooded_close": HoodedCloseSim(client, use_same_front_back, use_symmetric_texture),     
+            "shirt": TShirtSim(client, use_same_front_back, use_symmetric_texture),
+            "shirt_close": TShirtSim(client, use_same_front_back, use_symmetric_texture),
+        
         }
         
         self.client = client
@@ -63,7 +68,7 @@ class Painter:
             if self.pipeline is None: # lazy initiate
                 self.pipeline = DiffusionPipeline.from_pretrained(
                     self.pipeline_name, torch_dtype=torch.float16, 
-                    device_map="balanced", local_files_only=True
+                    device_map="balanced" #, local_files_only=True
                 )
 
             for prompt in prompts:

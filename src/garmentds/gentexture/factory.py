@@ -8,6 +8,8 @@ import numpy as np
 
 from garmentds.gentexture.paint import Painter
 from garmentds.gentexture.rating import Judge
+from garmentds.genmesh.template import garment_dict
+from garmentds.genmesh.cfg import generate_cfg
 
 class Factory:
     def __init__(self, cloth_output_dir: str, name: str):
@@ -28,9 +30,16 @@ class Factory:
         self.output_dir = os.path.join(self.cloth_output_dir, f"{self.cloth_output_idx}")
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def get_mesh(self, mesh_data_dir):
+    def get_mesh(self, mesh_data_dir: str):
         """ Get mesh data files from mesh_data_dir """
         pass
+
+    def generate_mesh(self, category: str, mesh_output_path: str):
+        """ Generate a mesh of type 'category' """
+        print(f"[ INFO ] generating mesh of a {category} in {os.path.abspath(mesh_output_path)}")
+        mesh = garment_dict[category](**generate_cfg(category, method="random").asdict())
+        mesh.triangulation()
+        mesh.quick_export(mesh_output_path)
 
     def paint_cloth(self, categoroy:str):
         """ apply texture to cloth and save the render result """
@@ -59,14 +68,17 @@ class SyntheticFactory(Factory):
             print(f"[ INFO ] found {len(self.texture_ready_to_use)} ready-to-use "
                   f"textures in {self.paint_cfg['ready_to_use_texture_dir']}")
 
-    def get_mesh(self, mesh_data_dir):
-        mesh_path = os.path.join(mesh_data_dir, "mesh.obj")
-        mtrl_path = os.path.join(mesh_data_dir, "material.mtl")
-        info_path = os.path.join(mesh_data_dir, "mesh_info.json")
+    def get_mesh(self, category: str, mesh_data_dir: str):
+        if mesh_data_dir is not None:
+            mesh_path = os.path.join(mesh_data_dir, "mesh.obj")
+            mtrl_path = os.path.join(mesh_data_dir, "material.mtl")
+            info_path = os.path.join(mesh_data_dir, "mesh_info.json")
 
-        shutil.copy(mesh_path, os.path.join(self.output_dir, "mesh.obj"))
-        shutil.copy(mtrl_path, os.path.join(self.output_dir, "material.mtl"))
-        shutil.copy(info_path, os.path.join(self.output_dir, "mesh_info.json"))
+            shutil.copy(mesh_path, os.path.join(self.output_dir, "mesh.obj"))
+            shutil.copy(mtrl_path, os.path.join(self.output_dir, "material.mtl"))
+            shutil.copy(info_path, os.path.join(self.output_dir, "mesh_info.json"))
+        else:
+            self.generate_mesh(category, os.path.join(self.output_dir, "mesh.obj"))
 
     def paint_cloth(self, category):
         """
@@ -117,12 +129,15 @@ class Text2TexFactory(Factory):
     def set_texture_paths(self):
         pass
 
-    def get_mesh(self, mesh_data_dir):
-        mesh_path = os.path.join(mesh_data_dir, "mesh.obj")
-        info_path = os.path.join(mesh_data_dir, "mesh_info.json")
+    def get_mesh(self, category: str, mesh_data_dir: str):
+        if mesh_data_dir is not None:
+            mesh_path = os.path.join(mesh_data_dir, "mesh.obj")
+            info_path = os.path.join(mesh_data_dir, "mesh_info.json")
 
-        shutil.copy(mesh_path, os.path.join(self.output_dir, "mesh.obj"))
-        shutil.copy(info_path, os.path.join(self.output_dir, "mesh_info.json"))
+            shutil.copy(mesh_path, os.path.join(self.output_dir, "mesh.obj"))
+            shutil.copy(info_path, os.path.join(self.output_dir, "mesh_info.json"))
+        else:
+            self.generate_mesh(category, os.path.join(self.output_dir, "mesh.obj"))
 
     def paint_cloth(self, category):
         cmd = [self.paint_cfg["python"], self.model_path]
@@ -154,12 +169,15 @@ class PolyHavenFactory(Factory):
         print(f"[ INFO ] found {len(self.texture_ready_to_use)} ready-to-use "
               f"textures in {self.paint_cfg['cache_dir']}")
 
-    def get_mesh(self, mesh_data_dir):
-        mesh_path = os.path.join(mesh_data_dir, "mesh.obj")
-        info_path = os.path.join(mesh_data_dir, "mesh_info.json")
+    def get_mesh(self, category: str, mesh_data_dir: str):
+        if mesh_data_dir is not None:
+            mesh_path = os.path.join(mesh_data_dir, "mesh.obj")
+            info_path = os.path.join(mesh_data_dir, "mesh_info.json")
                 
-        shutil.copy(mesh_path, os.path.join(self.output_dir, "mesh.obj"))
-        shutil.copy(info_path, os.path.join(self.output_dir, "mesh_info.json"))
+            shutil.copy(mesh_path, os.path.join(self.output_dir, "mesh.obj"))
+            shutil.copy(info_path, os.path.join(self.output_dir, "mesh_info.json"))
+        else:
+            self.generate_mesh(category, os.path.join(self.output_dir, "mesh.obj"))
 
     def paint_cloth(self, category):
         texture_path = np.random.choice(self.texture_ready_to_use)
@@ -177,16 +195,15 @@ def make_cloth(
     start_idx: int = 0,
     num_to_generate: int = 1,
     mesh_input_dir: str = None,
-    cloth_output_dir: str = "./cloth",
+    cloth_output_dir: str = None,
     strategy: str = "synthetic",
     paint_cfg: dict = None,
     rating_cfg: dict = None
 ):
-    print(category, start_idx, num_to_generate, mesh_input_dir, cloth_output_dir, strategy)
-    # get mesh
-    all_mesh_paths = os.listdir(mesh_input_dir)
-    print(f"[ INFO ] found {len(all_mesh_paths)} meshes in {mesh_input_dir}")
-    
+    # set output_dir
+    if cloth_output_dir is None:
+        cloth_output_dir = os.path.join(os.environ["FOLDNET_BASE_DIR"], f"data/cloth/{category}")
+
     # create factory
     if strategy == "synthetic":
         factory = SyntheticFactory(cloth_output_dir, paint_cfg, rating_cfg)
@@ -205,12 +222,25 @@ def make_cloth(
             factory_cfg=factory.export_cfg(),
         ), f, indent=4)
 
+    # find existing mesh
+    if mesh_input_dir is not None:
+        all_mesh_paths = os.listdir(mesh_input_dir)
+        print(f"[ INFO ] found {len(all_mesh_paths)} meshes in {mesh_input_dir}")
+    else:
+        all_mesh_paths = None
+        print("[ INFO ] found no mesh")
+
+    # generate cloth
     for i in range(num_to_generate):
-        # randomly select a mesh
-        random_mesh_idx = np.random.choice(all_mesh_paths)
+        if all_mesh_paths is not None:
+            # randomly select a mesh
+            random_mesh_idx = np.random.choice(all_mesh_paths)
+            mesh_data_dir = os.path.join(mesh_input_dir, random_mesh_idx)
+        else:
+            mesh_data_dir = None
 
         factory.set_cloth_output_idx(i+start_idx)
-        factory.get_mesh(os.path.join(mesh_input_dir, random_mesh_idx))
+        factory.get_mesh(category, mesh_data_dir)
         factory.paint_cloth(category)
 
     print("[ Info ] cloth maked successfully! exiting...")

@@ -125,16 +125,12 @@ class TShirtSim(Base):
     def union_images(self, images):
         np_images = [np.array(image) for image in images]
         np_front, np_back, np_sleeve, np_collar = np_images[:4]
-        np_icons = np_images[4:]
+
         resized_front = cv2.resize(np_front, (512, 512))
         resized_back = cv2.resize(np_back, (512, 512))
         resized_sleeve = cv2.resize(np_sleeve, (512, 512))
         resized_collar = cv2.resize(np_collar, (512, 512))
-        resized_icons = [cv2.resize(np_icon, (64, 64)) for np_icon in np_icons]
-        ## TODO: add icons
-        # front_blend = cv2.addWeighted(resized_front[360:424, 224:288, :], 0.5, resized_icon, 0.5, 1.0, 0.0)
-        # resized_front[360:424, 224:288, :] = front_blend
-        # Image.fromarray(np.uint8(front_blend)).save("blend.png")
+
         union = np.zeros((1024, 1024, 3))
         union[:512, :512, :] = resized_front
         if self.use_same_front_back:

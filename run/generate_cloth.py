@@ -23,6 +23,7 @@ setup_env_var()
 
 import hydra
 import omegaconf
+import taichi as ti
 
 import garmentds.common.utils as utils
 from garmentds.gentexture import factory
@@ -34,6 +35,13 @@ def main(cfg: omegaconf.DictConfig):
     omegaconf.OmegaConf.resolve(cfg)
     cfg = utils.resolve_overwrite(cfg)
     omegaconf.OmegaConf.save(cfg, os.path.join(os.getcwd(), ".hydra", "resolved.yaml"))
+
+    ti_cfg = cfg["setup"]["taichi"]
+    ti.init(
+        arch=ti.cuda, debug=ti_cfg["debug"], random_seed=ti_cfg["seed"], 
+        advanced_optimization=ti_cfg["advanced_optimization"], 
+        fast_math=ti_cfg["fast_math"], offline_cache=ti_cfg["offline_cache"]
+    )
 
     factory.make_cloth(**cfg["garment"])
 
