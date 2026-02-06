@@ -1,13 +1,11 @@
 import os
-import sys
 import shutil
 import subprocess
 
 import json
-import PIL.Image
 import trimesh
-import trimesh.transformations as tra
 import pyflex
+import numpy as np
 
 from garmentds.gentexture.template.clothes import *
 from garmentds.gentexture.utils.flex_utils import *
@@ -17,7 +15,8 @@ class SimEnv:
     def __init__(self, gui : bool = False, 
                  dump_visualizations : bool = False,
                  output_dir : str = 'outputs/flex_imgs'):
-        pyflex.init(not gui, True, 480, 480, 0)
+        
+        pyflex.init(not gui, False, 480, 480, 0)
         
         self.config = get_default_config()
         self.grasp_height = 0.03
@@ -51,8 +50,8 @@ class SimEnv:
             "tshirt": TShirtSim(),
             "tshirt_sp": TShirtSPSim(),
             "trousers": TrousersSim(),
-            "vest": VestCloseSPSim(),
-            "hooded": HoodedCloseSim(),
+            "vest_close": VestCloseSPSim(),
+            "hooded_close": HoodedCloseSim(),
         }
 
     def set_scene(self,

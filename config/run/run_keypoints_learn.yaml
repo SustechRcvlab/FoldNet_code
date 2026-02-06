@@ -9,7 +9,7 @@ misc:
   hardware:
     precision: high # [highest, high, medium]
     cuda: True
-    gpuids: [0, 1, 2, 3, 4, 5, 6, 7]
+    gpuids: # [0, 1, 2, 3, 4, 5, 6, 7]
     dtype: float32
   taichi:
     device: cpu
@@ -44,7 +44,7 @@ data:
     valid_size: 0.2
     batch_size: 32
     num_workers: 4
-    drop_last: False
+    drop_last: True
   dataset:
     dtype: ${misc.hardware.dtype}
     aug:

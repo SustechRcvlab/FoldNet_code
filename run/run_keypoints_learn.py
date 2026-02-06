@@ -1,6 +1,3 @@
-from re import A
-import taichi as ti
-
 import json
 import os
 import sys
@@ -12,16 +9,15 @@ import omegaconf
 
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
 
 import lightning.pytorch as pl
 from lightning.pytorch import loggers as pl_loggers
 from lightning.pytorch.profilers import AdvancedProfiler, SimpleProfiler, PyTorchProfiler
-from lightning.pytorch.callbacks import Callback, ModelCheckpoint, ModelSummary, LearningRateMonitor
+from lightning.pytorch.callbacks import Callback, ModelSummary, LearningRateMonitor
 
 import garmentds.common.utils as utils
 import garmentds.keypoint_detection.utils.learn_utils as learn_utils
-from garmentds.keypoint_detection.data.datamodule import KeypointsDataModule
+from garmentds.keypoint_detection.data_utils.datamodule import KeypointsDataModule
 from garmentds.keypoint_detection.models.detector import KeypointDetector
 
 @hydra.main(config_path="../config/run", config_name=pathlib.Path(__file__).stem, version_base='1.3')
@@ -37,11 +33,6 @@ def main(cfg: omegaconf.DictConfig):
     np.random.seed(cfg.misc.seed)
     random.seed(cfg.misc.seed)
     torch.set_float32_matmul_precision(cfg.misc.hardware.precision)
-    # ti.init(
-    #     arch=getattr(ti, cfg.misc.taichi.device), 
-    #     default_fp=ti.f32, default_ip=ti.i32, device_memory_GB=cfg.misc.taichi.device_memory_GB, 
-    #     offline_cache=True, fast_math=False, debug=False
-    # )
 
     with open(os.path.join("command_line.json"), "w") as f_obj:
         json.dump(obj=dict(
@@ -54,7 +45,6 @@ def main(cfg: omegaconf.DictConfig):
     dtmd = KeypointsDataModule(
         [utils.get_path_handler()(s) for s in cfg.train.path.data_paths], cfg.data,
     )
-    # ti.reset(), ti.init(ti.cpu)
 
     # training
     ckpt_path = cfg.train.path.ckpt

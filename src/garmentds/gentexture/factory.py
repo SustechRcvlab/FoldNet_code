@@ -5,6 +5,7 @@ import json
 import omegaconf
 import subprocess
 import numpy as np
+import taichi as ti
 
 from garmentds.gentexture.paint import Painter
 from garmentds.gentexture.rating import Judge
@@ -40,6 +41,7 @@ class Factory:
         mesh = garment_dict[category](**generate_cfg(category, method="random").asdict())
         mesh.triangulation()
         mesh.quick_export(mesh_output_path)
+        ti.reset() # free VRAM
 
     def paint_cloth(self, categoroy:str):
         """ apply texture to cloth and save the render result """

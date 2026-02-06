@@ -34,6 +34,7 @@ class Cfg:
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--subprocess", action="store_true")
+    parser.add_argument("--num_workers", type=int, default=3)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--output_dir", type=str, default=None)
     parser.add_argument("--category", type=str, default="tshirt_sp")
@@ -148,6 +149,7 @@ def main():
             cfg.out_dir = args.output_dir
 
         cfg.category = args.category
+        cfg.num_workers = args.num_workers
         cfg.job_ids = [args.start_idx + i for i in range(args.num_to_generate)]
         
         Main(cfg).run()

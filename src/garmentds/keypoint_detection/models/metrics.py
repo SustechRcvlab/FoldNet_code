@@ -187,6 +187,8 @@ def calculate_mAP(classified_keypoints: List[ClassifiedKeypoint], total_ground_t
         if keypoint.true_positive:
             correct_num += 1
 
+    if gt_keypoint_num == 0: # no gt keypoints, all occluded
+        return 0.
     return correct_num / gt_keypoint_num    
 
 def calculate_AKD(
@@ -206,8 +208,10 @@ def calculate_AKD(
     for keypoint in sorted(classified_keypoints, key=lambda x: x.probability, reverse=True):
         total_distance.append(keypoint.distance_to_gt)
 
-    percentile = np.percentile(total_distance, list(range(10, 101, 10))) if provide_percentile else None
+    if gt_keypoint_num == 0: # no gt keypoints, all occluded
+        return np.inf, [np.inf] * 10
 
+    percentile = np.percentile(total_distance, list(range(10, 101, 10))) if provide_percentile else None
     return sum(total_distance) / gt_keypoint_num, percentile
 
 class KeypointAPMetric(Metric):

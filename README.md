@@ -62,7 +62,7 @@ We provide compiled pyflex for python 3.9. Please refer to src/pyflex/libs/how_t
     ```
 5. Full test
     ```bash
-    CUDA_VISIBLE_DEVICES=0 python run/fold_multi_cat.py env.cloth_obj_path=asset/garment_example/mesh.obj env.render_process_num=1 '+env.init_cloth_vel_range=[1.,2.]'
+    CUDA_VISIBLE_DEVICES=0 python run/fold_multi_cat.py env.cloth_obj_path=asset/garment_example/0/mesh.obj env.render_process_num=1 '+env.init_cloth_vel_range=[1.,2.]'
     ```
 
 ## Asset Synthesis
@@ -77,7 +77,34 @@ python script/gen_data/gen_mesh.py --category tshirt_sp --num_to_generate 10
 python script/gen_data/gen_texture.py --category tshirt_sp --num_to_generate 10 
 ```
 
-3. Generate textured cloth
+3. Generate textured clothes
 ```bash
 python run/generate_cloth.py garment.category=tshirt_sp garment.num_to_generate=1
 ```
+
+## Keypoints Detection
+
+1. Generate Training Data
+
+    Textured clothes assets should be generated first using the previous step. Then run the following command (which will deform the clothes, render the RGB and mask, and save the keypoints) to generate training data for keypoints detection.
+
+```bash
+python run/generate_training_data.py garment.category=tshirt_sp garment.num_to_generate=1 garment.cloth_input_dir="$PWD/asset/garment_example"
+```
+
+2. Train Keypoints Detection Model
+
+- First, download the "FreeMono" font (requested for visualization):
+
+```bash
+sudo apt update
+sudo apt install fonts-freefont-ttf
+```
+
+- Then, start training by running the following command (make sure you have generated training data before running this command):
+
+```bash
+python run/run_keypoints_learn.py train.category=tshirt_sp train.path.data_paths="['$PWD/data/train/tshirt_sp/synthetic']"
+```
+
+

@@ -38,6 +38,9 @@ if __name__ == '__main__':
                 "openai",
                 "transformers", 
                 "sentencepiece", 
+                "wandb",
+                "timm",
+                "scikit-image"
             ]
         )
     except:

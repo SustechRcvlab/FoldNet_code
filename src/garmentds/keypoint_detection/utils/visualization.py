@@ -1,13 +1,9 @@
-from argparse import ArgumentParser
 from typing import List, Tuple
 
 import numpy as np
 import torch
-import torchvision
 from matplotlib import cm
 from PIL import Image, ImageDraw, ImageFont
-
-from garmentds.keypoint_detection.utils.heatmap import generate_channel_heatmap
 
 # Kelly's 22 colors for max contrast
 # cf. https://gist.github.com/ollieglass/f6ddd781eeae1d24e391265432297538
@@ -170,11 +166,11 @@ def draw_one_channel_keypoints_on_image(
     # draw caption
     draw.ellipse((20 - 3*radius,4*radius,20 + 3*radius,10*radius), fill=color_pool[-2])
     draw.text(
-        (20 + 6 * radius, 2 * radius), f"=pred",
+        (20 + 6 * radius, 2 * radius), "=pred",
         fill=color_pool[-2], font=ImageFont.truetype("FreeMono.ttf", size=10 * radius))
     draw.polygon(get_coord(tiny_triangle, np.array([150, 7*radius])), fill=color_pool[-1])
     draw.text(
-        (150 + 5 * radius, 2 * radius), f"=ground truth",
+        (150 + 5 * radius, 2 * radius), "=ground truth",
         fill=color_pool[-1], font=ImageFont.truetype("FreeMono.ttf", size=10 * radius))
     
     # draw keypoint
@@ -218,8 +214,8 @@ def draw_all_channel_keypoints_on_image(
 
     draw = ImageDraw.Draw(image)
     color_pool = DISTINCT_COLORS
-    tiny_triangle = np.array([[-np.sin(np.pi/3), np.cos(np.pi/3)], 
-                      [np.sin(np.pi/3), np.cos(np.pi/3)], [0, -1]]) * 5*radius
+    # tiny_triangle = np.array([[-np.sin(np.pi/3), np.cos(np.pi/3)], 
+    #                   [np.sin(np.pi/3), np.cos(np.pi/3)], [0, -1]]) * 5*radius
 
     for channel_idx, keypoints in enumerate(image_keypoints):
         keypoint = keypoints[0]

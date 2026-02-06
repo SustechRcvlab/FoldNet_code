@@ -1,7 +1,4 @@
 import os
-import re
-import argparse
-import shutil
 
 import omegaconf
 from typing import Any, Dict, List
@@ -12,7 +9,7 @@ import torch.nn as nn
 import torchvision
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 import matplotlib.pyplot as plt
 
 import wandb
@@ -22,9 +19,8 @@ from garmentds.keypoint_detection.models.backbones.backbone_factory import Backb
 from garmentds.keypoint_detection.models.metrics import (
     DetectedKeypoint, Keypoint, KeypointAPMetrics )
 from garmentds.keypoint_detection.utils.heatmap import (
-    BCE_loss, create_heatmap_batch, get_keypoints_from_heatmap_batch_maxpool )
+    create_heatmap_batch, get_keypoints_from_heatmap_batch_maxpool )
 from garmentds.keypoint_detection.utils.visualization import (
-    get_logging_label_from_channel_configuration,
     visualize_predicted_heatmaps,
     visualize_predicted_keypoints, 
 )
@@ -162,7 +158,7 @@ class KeypointDetector(pl.LightningModule):
         gt_heatmaps = [
             create_heatmap_batch(heatmap_shape, keypoint_channel, self.heatmap_sigma, self.device)
             for keypoint_channel in keypoint_channels
-        ] # num_keypoints x [N, H, W]
+        ] # num_keypoints x [B, H, W]
 
         input_images = input_images.to(self.device)
 
@@ -170,7 +166,7 @@ class KeypointDetector(pl.LightningModule):
         predicted_unnormalized_maps = self.forward_unnormalized(input_images)
         predicted_heatmaps = torch.sigmoid(predicted_unnormalized_maps)
         channel_losses = []
-        channel_gt_losses = []
+        # channel_gt_losses = []
 
         result_dict = {}
         for channel_idx in range(len(self.keypoint_channel_configuration)):
@@ -269,13 +265,13 @@ class KeypointDetector(pl.LightningModule):
             keypoint_grids, all_keypoints = self.visualize_predicted_keypoints(result_dict, num_to_visualize)
 
             ## visualize all channels in a single heatmap
-            if all_channels != None:
+            if all_channels is not None:
                 for idx, img in enumerate(all_channels):
                     Image.fromarray((img*255).permute(1,2,0).numpy().astype(np.uint8))\
                          .save(os.path.join(batch_dir, f"heatmap_all_channels_{idx}.png"))
 
             ## visualize all the keypoints in a single image
-            if all_keypoints != None:
+            if all_keypoints is not None:
                 for idx, img in enumerate(all_keypoints):
                     img.save(os.path.join(batch_dir, f"keypoint_all_channels_{idx}.png"))
 
@@ -323,7 +319,7 @@ class KeypointDetector(pl.LightningModule):
         Used to compute and log the AP metrics.
         """
         self.log_and_reset_ap_kd("validation")
-        if type(self._most_recent_val_mean_ap) == torch.Tensor:
+        if type(self._most_recent_val_mean_ap) is torch.Tensor:
             self.log("checkpointing_metrics/valmeanAP", 
                 self._most_recent_val_mean_ap.clone().detach().to(self.device), sync_dist=True)
         else:
@@ -342,7 +338,7 @@ class KeypointDetector(pl.LightningModule):
 
     def log_predicted_keypoints(self, grid, mode=str):
         label = f"predicted_keypoints_{mode}"
-        image_caption = "predicted keypoints"
+        # image_caption = "predicted keypoints"
         keypoints = torch.cat(grid, dim=0)
         grided_keypoints = torchvision.utils.make_grid(keypoints, nrow=len(keypoints))
         self.logger.experiment.add_image(label, grided_keypoints, self.global_rank)
@@ -367,7 +363,6 @@ class KeypointDetector(pl.LightningModule):
             raise ValueError(f"mode {mode} not recognized")
 
         # calculate APs for each channel and each threshold distance, and log them
-        print(f" # {mode} metrics:")
         for channel_idx, channel_name in enumerate(self.keypoint_channel_configuration):
             channel_aps_kds, channel_kp_percentile = \
                 self.compute_and_log_metrics_for_channel(metrics[channel_idx], channel_name, mode)

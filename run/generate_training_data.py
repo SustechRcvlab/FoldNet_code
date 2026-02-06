@@ -18,8 +18,7 @@ import hydra
 import omegaconf
 
 import garmentds.common.utils as utils
-from garmentds.keypoint_detection.data.make_data import make_data
-
+from garmentds.keypoint_detection.data_utils.make_data import make_data
 
 @hydra.main(config_path="../config/run", config_name=pathlib.Path(__file__).stem, version_base='1.3')
 def main(cfg: omegaconf.DictConfig):
@@ -29,7 +28,7 @@ def main(cfg: omegaconf.DictConfig):
     cfg = utils.resolve_overwrite(cfg)
     omegaconf.OmegaConf.save(cfg, os.path.join(os.getcwd(), ".hydra", "resolved.yaml"))
 
-    make_data(**cfg)
+    make_data(**cfg["garment"])
 
 if __name__ == "__main__":
     main()
