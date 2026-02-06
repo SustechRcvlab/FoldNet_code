@@ -43,7 +43,9 @@ sudo apt install ffmpeg
     ```
 
 4. Build PyFlex
-We provide compiled pyflex for python 3.9. Please refer to src/pyflex/libs/how_to_run_without_docker.md for more details.
+
+    We provide compiled pyflex for python 3.9. Please refer to `src/pyflex/libs/how_to_run_without_docker.md` for more details. If you want to compile pyflex by yourself, please refer to `src/pyflex/README.md`.
+
 - Append the following code to ~/.zshrc or ~/.bashrc
     ```bash
     export PYFLEX_PATH=/your/path/to/FoldNet_code/src/pyflex
@@ -86,7 +88,7 @@ python run/generate_cloth.py garment.category=tshirt_sp garment.num_to_generate=
 
 1. Generate Training Data
 
-    Textured clothes assets should be generated first using the previous step. Then run the following command (which will deform the clothes, render the RGB and mask, and save the keypoints) to generate training data for keypoints detection.
+    Texured clothes assets should be generated first using the previous step. Then, run the following command (which will deform the clothes, render the RGB and mask, and save the keypoints) to generate training data for keypoints detection (replace `garment.cloth_input_dir` with the directory where the generated clothes are located):
 
 ```bash
 python run/generate_training_data.py garment.category=tshirt_sp garment.num_to_generate=1 garment.cloth_input_dir="$PWD/asset/garment_example"
@@ -94,7 +96,7 @@ python run/generate_training_data.py garment.category=tshirt_sp garment.num_to_g
 
 2. Train Keypoints Detection Model
 
-- First, download the "FreeMono" font (requested for visualization):
+- First, download the "FreeMono" font (used for visualization):
 
 ```bash
 sudo apt update
