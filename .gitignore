@@ -13,3 +13,5 @@ imgui.ini
 data/**
 data
 .cache/**
+blender-4.2.9-linux-x64/**
+blender-4.2.9-linux-x64/4.2/datafiles/colormanagement/luts/AgX_Base_P3.cube
